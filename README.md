@@ -6,6 +6,8 @@ Spark hive Application
 - Hive :2.3.5
 - Spark: 2.4.6
 
+### I have not added any hive-site.xml file .. because we have tested local and thrift mode.
+
 ## How to run the App in IntelliJ
  run the App by selecting the Class and run it.
 
