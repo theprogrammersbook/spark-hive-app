@@ -41,7 +41,13 @@ object ThriftHiveDBTableExample {
 
     sql("show databases").show()
 
-  //  sql("CREATE DATABASE IF NOT EXISTS hive")  // Giving error not able to create db.
+    sql("CREATE DATABASE IF NOT EXISTS hive2")  // Giving error not able to create db if we run in local
+    // To create DB ,we have to run in yarn mode. then it will work.
+    /*
+/target$ spark-submit --master yarn  --class com.tpb.spark.hive.ThriftHiveDBTableExample spark-hive-integration-app-1.0-SNAPSHOT.jar
+/target$ spark-submit --master yarn  --deploy-mode client --class com.tpb.spark.hive.ThriftHiveDBTableExample spark-hive-integration-app-1.0-SNAPSHOT.jar
+/target$ spark-submit --master yarn  --deploy-mode cluster --class com.tpb.spark.hive.ThriftHiveDBTableExample spark-hive-integration-app-1.0-SNAPSHOT.jar
+     */
 
     sql("CREATE TABLE IF NOT EXISTS hive.src (key INT, value STRING) USING hive")
     sql("LOAD DATA LOCAL INPATH 'src/main/resources/kv1.txt' INTO TABLE src")
