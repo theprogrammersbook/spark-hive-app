@@ -17,40 +17,27 @@
 package com.tpb.spark.hive
 
 // $example on:spark_hive$
-import java.io.File
-
 import org.apache.spark.sql.SparkSession
 // $example off:spark_hive$
 
-object SparkHiveFirstExample {
+object ThriftConnection {
 
   // $example on:spark_hive$
   case class Record(key: Int, value: String)
   // $example off:spark_hive$
 
   def main(args: Array[String]) {
-    // Not copied hive-site.xml to spark location.
-    // So, Spark will create its own metastore and own warehouse with the below specified locaiton
-    val warehouseLocation = new File("spark-warehouse").getAbsolutePath
 
     val spark = SparkSession
       .builder()
-      .appName("Spark Hive Example")
+      .appName("Thrift Hive Example")
       .master("local")
-      .config("spark.sql.warehouse.dir", warehouseLocation)
+      .config("hive.metastore.uris","thrift://localhost:9083")// When I keep this , then it is working fine.
+      // Note: Hive server should be running.
+      .config("spark.sql.warehouse.dir", "/user/nagaraju/warehouse")
+      // When i keep only that above then I am not able to connect hdfs location.
       .enableHiveSupport()
       .getOrCreate()
-    /*
-      Problem:
-      The root scratch dir: /tmp/hive on HDFS should be writable. Current permissions are: rw-rw-rw- (on Windows)
-      Solution:
-      Local:
-      nagaraju@nagaraju:/tmp$ sudo chmod 777 -R hive/  OR
-      HFDS:
-      nagaraju@nagaraju:~$ hdfs dfs -chmod -R  777  /tmp
-      nagaraju@nagaraju:~$ hdfs dfs -ls /
-
-     */
 
     import spark.sql
 

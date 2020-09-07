@@ -17,34 +17,22 @@
 package com.tpb.spark.hive
 
 // $example on:spark_hive$
-import java.io.File
-
 import org.apache.spark.sql.{Row, SaveMode, SparkSession}
 // $example off:spark_hive$
 
-object SparkHiveExampleMain {
+object SparkHiveExample {
 
   // $example on:spark_hive$
   case class Record(key: Int, value: String)
   // $example off:spark_hive$
 
   def main(args: Array[String]) {
-    // When working with Hive, one must instantiate `SparkSession` with Hive support, including
-    // connectivity to a persistent Hive metastore, support for Hive serdes, and Hive user-defined
-    // functions. Users who do not have an existing Hive deployment can still enable Hive support.
-    // When not configured by the hive-site.xml, the context automatically creates `metastore_db`
-    // in the current directory and creates a directory configured by `spark.sql.warehouse.dir`,
-    // which defaults to the directory `spark-warehouse` in the current directory that the spark
-    // application is started.
-
-    // $example on:spark_hive$
-    // warehouseLocation points to the default location for managed databases and tables
-    val warehouseLocation = new File("spark-warehouse").getAbsolutePath
 
     val spark = SparkSession
       .builder()
       .appName("Spark Hive Example")
-      .config("spark.sql.warehouse.dir", warehouseLocation)
+      .config("hive.metastore.uris","thrift://localhost:9083")
+      .config("spark.sql.warehouse.dir", "/user/nagaraju/warehouse")
       .enableHiveSupport()
       .getOrCreate()
 
@@ -52,7 +40,7 @@ object SparkHiveExampleMain {
     import spark.sql
 
     sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive")
-    sql("LOAD DATA LOCAL INPATH 'examples/src/main/resources/kv1.txt' INTO TABLE src")
+    sql("LOAD DATA LOCAL INPATH 'src/main/resources/kv1.txt' INTO TABLE src")
 
     // Queries are expressed in HiveQL
     sql("SELECT * FROM src").show()
