@@ -17,7 +17,7 @@
 package com.tpb.spark.hive
 
 // $example on:spark_hive$
-import org.apache.spark.sql.{Row, SaveMode, SparkSession}
+import org.apache.spark.sql.SparkSession
 // $example off:spark_hive$
 
 object SparkHiveExample {
@@ -31,19 +31,34 @@ object SparkHiveExample {
     val spark = SparkSession
       .builder()
       .appName("Spark Hive Example")
+      .master("local")
       .config("hive.metastore.uris","thrift://localhost:9083")
       .config("spark.sql.warehouse.dir", "/user/nagaraju/warehouse")
       .enableHiveSupport()
       .getOrCreate()
 
-    import spark.implicits._
     import spark.sql
 
-    sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive")
+   /* sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive")
     sql("LOAD DATA LOCAL INPATH 'src/main/resources/kv1.txt' INTO TABLE src")
-
+*//*
     // Queries are expressed in HiveQL
     sql("SELECT * FROM src").show()
+
+
+    // Create a Hive managed Parquet table, with HQL syntax instead of the Spark SQL native syntax
+    // `USING hive`
+    sql("CREATE TABLE hive_records(key int, value string) STORED AS PARQUET")
+    // Save DataFrame to the Hive managed table
+    val df = spark.table("src")
+    df.write.mode(SaveMode.Overwrite).saveAsTable("hive_records")*/
+    // After insertion, the Hive managed table has data now
+
+    val recordsDF = spark.createDataFrame((1 to 100).map(i => Record(i, s"val_$i")))
+   // recordsDF.createOrReplaceTempView("hive_records")
+
+
+    sql("SELECT * FROM hive_records").show()
     // +---+-------+
     // |key|  value|
     // +---+-------+
@@ -51,6 +66,15 @@ object SparkHiveExample {
     // | 86| val_86|
     // |311|val_311|
     // ...
+
+    // +---+-------+
+    // |key|  value|
+    // +---+-------+
+    // |238|val_238|
+    // | 86| val_86|
+    // |311|val_311|
+    // ...
+/*
 
     // Aggregation queries are also supported.
     sql("SELECT COUNT(*) FROM src").show()
@@ -135,6 +159,7 @@ object SparkHiveExample {
     // | val_86| 86|
     // |val_311|311|
     // ...
+*/
 
     spark.stop()
     // $example off:spark_hive$
